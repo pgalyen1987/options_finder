@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Analysis Report</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table { 
+            border-collapse: collapse; 
+            width: 100%;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td { 
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th { 
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        tr:nth-child(even) { 
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .summary {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .ticker-list {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .ticker-list span {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        .debug-info {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Options Analysis Report</h1>
+        <div class="timestamp">Generated at: {{ timestamp }}</div>
+
+        <div class="ticker-list">
+            <h3>Trending Tickers</h3>
+            {% if trending_tickers %}
+                {% for ticker in trending_tickers %}
+                    <span>{{ ticker }}</span>
+                {% endfor %}
+            {% else %}
+                <p>No trending tickers found</p>
+            {% endif %}
+        </div>
+
+        <div class="ticker-list">
+            <h3>Recommended Stocks</h3>
+            {% if recommended_stocks %}
+                {% for ticker in recommended_stocks %}
+                    <span>{{ ticker }}</span>
+                {% endfor %}
+            {% else %}
+                <p>No recommended stocks found</p>
+            {% endif %}
+        </div>
+
+        <div class="debug-info">
+            <h3>Debug Information</h3>
+            <p>Last Scan Time: {{ last_scan_time }}</p>
+            <p>Number of Opportunities: {{ opportunities|length if opportunities else 0 }}</p>
+        </div>
+
+        {% if opportunities %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Current Price</th>
+                    <th>Expiration Date</th>
+                    <th>Days Until Exp</th>
+                    <th>Strike Price</th>
+                    <th>Break Even</th>
+                    <th>Break Even %</th>
+                    <th>Option Cost</th>
+                    <th>Volume</th>
+                    <th>Open Interest</th>
+                    <th>IV %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for opt in opportunities %}
+                <tr>
+                    <td>{{ opt.symbol }}</td>
+                    <td>${{ "%.2f"|format(opt.current_price) }}</td>
+                    <td>{{ opt.expiration_date }}</td>
+                    <td>{{ opt.days_until_expiration }}</td>
+                    <td>${{ "%.2f"|format(opt.strike_price) }}</td>
+                    <td>${{ "%.2f"|format(opt.break_even_price) }}</td>
+                    <td>{{ "%.2f"|format(opt.break_even_percentage) }}%</td>
+                    <td>${{ "%.2f"|format(opt.option_cost) }}</td>
+                    <td>{{ opt.volume }}</td>
+                    <td>{{ opt.open_interest }}</td>
+                    <td>{{ "%.2f"|format(opt.implied_volatility) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="summary">
+            <p>No valid options opportunities found. This could be because:</p>
+            <ul>
+                <li>No options meet the filtering criteria (price < $5.00, break-even < 50%)</li>
+                <li>Error fetching options data from the API</li>
+                <li>No options available for the selected stocks</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html> 
